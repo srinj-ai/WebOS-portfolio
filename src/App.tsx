@@ -8,11 +8,12 @@ import {
   Info,
   Menu,
   Plus,
+  Sparkles,
   Terminal,
   X,
 } from 'lucide-react';
 
-type AppType = 'text' | 'notepad' | 'calculator';
+type AppType = 'welcome' | 'text' | 'notepad' | 'calculator';
 type AppKey = 'welcome' | 'terminal' | 'explorer' | 'browser' | 'notepad' | 'calculator';
 
 type AppConfig = {
@@ -40,8 +41,8 @@ const APP_CONFIGS: Record<AppKey, AppConfig> = {
   welcome: {
     title: 'Welcome to TXJ WebOS',
     icon: <Info size={14} />,
-    type: 'text',
-    content: 'This is your desktop shell. Move windows by dragging the header.',
+    type: 'welcome',
+    content: '',
   },
   terminal: {
     title: 'Terminal',
@@ -150,7 +151,7 @@ function calculateExpression(expression: string) {
 
 export default function App() {
   const [windows, setWindows] = useState<WebWindow[]>([
-    { id: 1, ...APP_CONFIGS.welcome, x: 100, y: 96 },
+    { id: 1, ...APP_CONFIGS.welcome, x: 120, y: 88 },
   ]);
   const [activeWindow, setActiveWindow] = useState(1);
   const [time, setTime] = useState(new Date());
@@ -229,6 +230,38 @@ export default function App() {
   };
 
   const renderContent = (win: WebWindow) => {
+    if (win.type === 'welcome') {
+      return (
+        <div className="welcome-panel">
+          <div className="welcome-hero">
+            <span className="welcome-badge">
+              <Sparkles size={14} /> Portfolio OS
+            </span>
+            <h1>TXJ WebOS</h1>
+            <p>
+              A tiny desktop inside the browser. Open apps, drag windows around, jot notes, and explore the
+              portfolio like it is its own operating system.
+            </p>
+          </div>
+
+          <div className="welcome-stats" aria-label="System highlights">
+            <span>React</span>
+            <span>TypeScript</span>
+            <span>Vite</span>
+          </div>
+
+          <div className="welcome-actions" aria-label="Quick launch">
+            {(['notepad', 'calculator', 'browser'] as AppKey[]).map((type) => (
+              <button key={type} onClick={() => openWindow(type)} className="welcome-action">
+                {APP_CONFIGS[type].icon}
+                <span>{APP_CONFIGS[type].title}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
     if (win.type === 'notepad') {
       return (
         <textarea
@@ -276,7 +309,7 @@ export default function App() {
             key={win.id}
             onClick={() => setActiveWindow(win.id)}
             style={{ left: `${win.x}px`, top: `${win.y}px`, zIndex: activeWindow === win.id ? 10 : 1 }}
-            className="window"
+            className={`window ${win.type === 'welcome' ? 'welcome-window' : ''}`}
           >
             <header className="window-titlebar" onMouseDown={(event) => startDrag(event, win.id)}>
               <span className="window-title">
