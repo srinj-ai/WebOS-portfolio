@@ -51,4 +51,8 @@ src/
 
 ## License
 
-MIT
+MIT License
+
+## Credits
+
+- Programed by [Srinjoy Das](https://github.com/srinj-ai)
