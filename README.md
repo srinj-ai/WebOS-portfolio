@@ -2,6 +2,10 @@
 
 An experimental browser-based desktop portfolio built with React, TypeScript, and Vite. It includes draggable windows, a start menu, desktop shortcuts, a notepad, and a calculator.
 
+<p align="center">
+  <img src="png/TXJ_img.png" alt="TXJ WebOS">
+</p>
+
 ## Features
 
 - Desktop-style window manager
