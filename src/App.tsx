@@ -37,6 +37,9 @@ type DragState = {
   };
 };
 
+
+// welcome window...
+
 const APP_CONFIGS: Record<AppKey, AppConfig> = {
   welcome: {
     title: 'Welcome to TXJ WebOS',
@@ -75,10 +78,17 @@ const APP_CONFIGS: Record<AppKey, AppConfig> = {
     content: '0',
   },
 };
+//...
 
+// display the desktop shortcuts and calculator buttons........
 const DESKTOP_SHORTCUTS: AppKey[] = ['notepad', 'calculator', 'browser', 'explorer'];
 const CALCULATOR_BUTTONS = ['7', '8', '9', '/', '4', '5', '6', '*', '1', '2', '3', '-', 'C', '0', '=', '+'];
 
+//...
+
+
+//hell.
+// calculate the result of a mathematical expression
 function calculateExpression(expression: string) {
   if (!/^[\d+\-*/.()\s]+$/.test(expression)) {
     return 'Error';
@@ -148,7 +158,10 @@ function calculateExpression(expression: string) {
     return 'Error';
   }
 }
+//...
 
+
+// main app component...
 export default function App() {
   const [windows, setWindows] = useState<WebWindow[]>([
     { id: 1, ...APP_CONFIGS.welcome, x: 120, y: 88 },
@@ -229,6 +242,8 @@ export default function App() {
     );
   };
 
+
+  //winbow content rendering based on type...
   const renderContent = (win: WebWindow) => {
     if (win.type === 'welcome') {
       return (
@@ -262,6 +277,7 @@ export default function App() {
       );
     }
 
+    // render content for notepad windows
     if (win.type === 'notepad') {
       return (
         <textarea
@@ -274,6 +290,8 @@ export default function App() {
       );
     }
 
+
+    // render content for calculator window
     if (win.type === 'calculator') {
       return (
         <div className="calculator-panel">
@@ -292,6 +310,8 @@ export default function App() {
     return <div className="text-panel">{win.content}</div>;
   };
 
+
+  // main render function for the app
   return (
     <main className="desktop" onMouseMove={onMouseMove} onMouseUp={() => setDragging(null)}>
       <section className="workspace" aria-label="TXJ WebOS desktop">
@@ -324,6 +344,8 @@ export default function App() {
         ))}
       </section>
 
+
+// taskbar and clock rendering...
       <nav className="taskbar" aria-label="Taskbar">
         <button onClick={() => setShowStartMenu(!showStartMenu)} className="start-button" aria-expanded={showStartMenu}>
           <Menu size={18} /> TXJ WebOS
