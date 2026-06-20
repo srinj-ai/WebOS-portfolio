@@ -14,6 +14,10 @@ An experimental browser-based desktop portfolio built with React, TypeScript, an
 - Responsive layout for desktop and mobile browsers
 - Strict TypeScript configuration
 
+##Apps Prestsent
+- notepad
+- calculator
+
 ## Getting Started
 
 Install dependencies:
@@ -33,7 +37,7 @@ Create a production build:
 ```bash
 npm run build
 ```
-
+Incase:
 Preview the production build locally:
 
 ```bash
@@ -47,6 +51,7 @@ src/
   App.tsx
   main.tsx
   styles.css
+
 ```
 
 ## License
