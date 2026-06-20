@@ -14,7 +14,7 @@ An experimental browser-based desktop portfolio built with React, TypeScript, an
 - Responsive layout for desktop and mobile browsers
 - Strict TypeScript configuration
 
-##Apps Prestsent
+## Apps Prestsent
 - notepad
 - calculator
 
