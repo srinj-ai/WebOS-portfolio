@@ -1,3 +1,7 @@
+/* ==========================================================================
+   Global base — typography, colors, and reset
+   ========================================================================== */
+
 :root {
   color: #f7f2e8;
   background: #15140f;
@@ -29,6 +33,10 @@ button {
   color: inherit;
 }
 
+/* ==========================================================================
+   Desktop shell — full-viewport layout (workspace + taskbar)
+   ========================================================================== */
+
 .desktop {
   display: flex;
   flex-direction: column;
@@ -58,6 +66,8 @@ button {
     linear-gradient(90deg, rgba(247, 242, 232, 0.035) 1px, transparent 1px);
   background-size: 28px 28px;
 }
+
+/* Desktop shortcut icons (top-left corner) */
 
 .desktop-icons {
   position: absolute;
@@ -107,6 +117,8 @@ button {
   text-align: center;
   overflow-wrap: anywhere;
 }
+
+/* Draggable app windows */
 
 .window {
   position: absolute;
@@ -165,12 +177,16 @@ button {
   background: #b94435;
 }
 
+/* Static text content (terminal, explorer, browser) */
+
 .text-panel {
   padding: 1rem;
   color: #e8ddca;
   font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
   font-size: 0.8rem;
 }
+
+/* Welcome window — hero, tech stack badges, quick-launch buttons */
 
 .welcome-panel {
   display: flex;
@@ -275,6 +291,8 @@ button {
   overflow-wrap: anywhere;
 }
 
+/* Notepad — editable textarea fills the window body */
+
 .notepad {
   flex: 1;
   width: 100%;
@@ -288,6 +306,8 @@ button {
   font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
   font-size: 0.82rem;
 }
+
+/* Calculator — display + 4×4 keypad grid */
 
 .calculator-panel {
   display: flex;
@@ -337,6 +357,8 @@ button {
   outline: none;
   background: #486b58;
 }
+
+/* Bottom taskbar — start button, app menu, and clock */
 
 .taskbar {
   position: relative;
@@ -423,6 +445,8 @@ button {
   font-weight: 700;
   white-space: nowrap;
 }
+
+/* Narrow screens — shrink windows and stack welcome actions vertically */
 
 @media (max-width: 640px) {
   .window {

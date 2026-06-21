@@ -13,9 +13,17 @@ import {
   X,
 } from 'lucide-react';
 
+// ---------------------------------------------------------------------------
+// Types — describe every "app" and the windows that hold them on the desktop
+// ---------------------------------------------------------------------------
+
+/** How the inside of a window is rendered (welcome screen, text, notepad, etc.) */
 type AppType = 'welcome' | 'text' | 'notepad' | 'calculator';
+
+/** Keys for each launchable app in the start menu and on the desktop */
 type AppKey = 'welcome' | 'terminal' | 'explorer' | 'browser' | 'notepad' | 'calculator';
 
+/** Static definition shared by every instance of the same app */
 type AppConfig = {
   title: string;
   icon: JSX.Element;
@@ -23,12 +31,14 @@ type AppConfig = {
   content: string;
 };
 
+/** A running window on the desktop — config plus position and a unique id */
 type WebWindow = AppConfig & {
   id: number;
   x: number;
   y: number;
 };
 
+/** Tracks which window is being dragged and where the cursor grabbed it */
 type DragState = {
   id: number;
   offset: {
@@ -37,8 +47,9 @@ type DragState = {
   };
 };
 
-
-// welcome window...
+// ---------------------------------------------------------------------------
+// App registry — title, icon, and default content for each program
+// ---------------------------------------------------------------------------
 
 const APP_CONFIGS: Record<AppKey, AppConfig> = {
   welcome: {
@@ -78,18 +89,23 @@ const APP_CONFIGS: Record<AppKey, AppConfig> = {
     content: '0',
   },
 };
-//...
 
-// display the desktop shortcuts and calculator buttons........
+/** Icons pinned to the top-left of the desktop (welcome opens on first load) */
 const DESKTOP_SHORTCUTS: AppKey[] = ['notepad', 'calculator', 'browser', 'explorer'];
+
+/** Calculator keypad layout — read left-to-right, top-to-bottom */
 const CALCULATOR_BUTTONS = ['7', '8', '9', '/', '4', '5', '6', '*', '1', '2', '3', '-', 'C', '0', '=', '+'];
 
-//...
+// ---------------------------------------------------------------------------
+// Calculator math — safe expression evaluator (no eval)
+// ---------------------------------------------------------------------------
 
-
-//hell.
-// calculate the result of a mathematical expression
+/**
+ * Evaluates a basic math expression using the shunting-yard algorithm.
+ * Only digits, operators (+ - * /), parentheses, and decimals are allowed.
+ */
 function calculateExpression(expression: string) {
+  // Reject anything that isn't a number, operator, parenthesis, or whitespace
   if (!/^[\d+\-*/.()\s]+$/.test(expression)) {
     return 'Error';
   }
@@ -104,6 +120,7 @@ function calculateExpression(expression: string) {
     const operators: string[] = [];
     const precedence: Record<string, number> = { '+': 1, '-': 1, '*': 2, '/': 2 };
 
+    /** Pop two numbers and one operator, then push the result back */
     const applyOperator = () => {
       const operator = operators.pop();
       const right = values.pop();
@@ -120,16 +137,19 @@ function calculateExpression(expression: string) {
     };
 
     tokens.forEach((token) => {
+      // Numbers go straight onto the value stack
       if (/^\d/.test(token)) {
         values.push(Number(token));
         return;
       }
 
+      // Opening parenthesis — wait for the matching close
       if (token === '(') {
         operators.push(token);
         return;
       }
 
+      // Closing parenthesis — resolve everything until the matching "("
       if (token === ')') {
         while (operators.length && operators[operators.length - 1] !== '(') {
           applyOperator();
@@ -138,6 +158,7 @@ function calculateExpression(expression: string) {
         return;
       }
 
+      // Operator — resolve higher-or-equal precedence ops on the stack first
       while (
         operators.length &&
         operators[operators.length - 1] !== '(' &&
@@ -148,6 +169,7 @@ function calculateExpression(expression: string) {
       operators.push(token);
     });
 
+    // Drain any remaining operators
     while (operators.length) {
       applyOperator();
     }
@@ -158,17 +180,29 @@ function calculateExpression(expression: string) {
     return 'Error';
   }
 }
-//...
 
+// ---------------------------------------------------------------------------
+// Root component — the full desktop experience
+// ---------------------------------------------------------------------------
 
-// main app component...
 export default function App() {
+  // --- State ---
+
+  /** All open windows; welcome starts visible on boot */
   const [windows, setWindows] = useState<WebWindow[]>([
     { id: 1, ...APP_CONFIGS.welcome, x: 120, y: 88 },
   ]);
+
+  /** Which window sits on top and receives focus */
   const [activeWindow, setActiveWindow] = useState(1);
+
+  /** Shown in the taskbar clock — updated every second */
   const [time, setTime] = useState(new Date());
+
+  /** Start menu dropdown visibility */
   const [showStartMenu, setShowStartMenu] = useState(false);
+
+  /** Non-null while the user is dragging a window by its title bar */
   const [dragging, setDragging] = useState<DragState | null>(null);
 
   const formattedTime = useMemo(
@@ -176,11 +210,15 @@ export default function App() {
     [time],
   );
 
+  // Tick the clock once per second
   useEffect(() => {
     const timer = window.setInterval(() => setTime(new Date()), 1000);
     return () => window.clearInterval(timer);
   }, []);
 
+  // --- Window management ---
+
+  /** Open a new instance of an app, staggered so windows don't stack perfectly */
   const openWindow = (type: AppKey) => {
     const id = Date.now();
     const x = Math.max(16, Math.min(150 + windows.length * 20, window.innerWidth - 300));
@@ -193,18 +231,21 @@ export default function App() {
 
   const closeWindow = (event: React.MouseEvent, id: number) => {
     event.stopPropagation();
-    setWindows((currentWindows) => currentWindows.filter((win) => win.id !== id));
+    setWindows((currentWindows) => currentWindows.filter((appWindow) => appWindow.id !== id));
   };
 
   const updateWindowContent = (id: number, newContent: string) => {
     setWindows((currentWindows) =>
-      currentWindows.map((win) => (win.id === id ? { ...win, content: newContent } : win)),
+      currentWindows.map((appWindow) =>
+        appWindow.id === id ? { ...appWindow, content: newContent } : appWindow,
+      ),
     );
   };
 
+  /** Handle a calculator key press for a specific window */
   const handleCalc = (id: number, value: string) => {
-    const win = windows.find((item) => item.id === id);
-    if (!win) return;
+    const appWindow = windows.find((item) => item.id === id);
+    if (!appWindow) return;
 
     if (value === 'C') {
       updateWindowContent(id, '0');
@@ -212,25 +253,32 @@ export default function App() {
     }
 
     if (value === '=') {
-      updateWindowContent(id, calculateExpression(win.content));
+      updateWindowContent(id, calculateExpression(appWindow.content));
       return;
     }
 
-    const current = win.content === '0' || win.content === 'Error' ? value : win.content + value;
+    // Replace a fresh "0" or "Error" display; otherwise append the digit/operator
+    const current =
+      appWindow.content === '0' || appWindow.content === 'Error'
+        ? value
+        : appWindow.content + value;
     updateWindowContent(id, current);
   };
 
+  // --- Drag-and-drop window movement ---
+
   const startDrag = (event: React.MouseEvent, id: number) => {
-    const win = windows.find((item) => item.id === id);
-    if (!win) return;
+    const appWindow = windows.find((item) => item.id === id);
+    if (!appWindow) return;
 
     setDragging({
       id,
-      offset: { x: event.clientX - win.x, y: event.clientY - win.y },
+      offset: { x: event.clientX - appWindow.x, y: event.clientY - appWindow.y },
     });
     setActiveWindow(id);
   };
 
+  /** Move the dragged window with the cursor, clamped inside the viewport */
   const onMouseMove = (event: React.MouseEvent) => {
     if (!dragging) return;
 
@@ -238,14 +286,16 @@ export default function App() {
     const newY = Math.max(0, Math.min(event.clientY - dragging.offset.y, window.innerHeight - 320));
 
     setWindows((currentWindows) =>
-      currentWindows.map((win) => (win.id === dragging.id ? { ...win, x: newX, y: newY } : win)),
+      currentWindows.map((appWindow) =>
+        appWindow.id === dragging.id ? { ...appWindow, x: newX, y: newY } : appWindow,
+      ),
     );
   };
 
+  // --- Per-window body content ---
 
-  //winbow content rendering based on type...
-  const renderContent = (win: WebWindow) => {
-    if (win.type === 'welcome') {
+  const renderContent = (appWindow: WebWindow) => {
+    if (appWindow.type === 'welcome') {
       return (
         <div className="welcome-panel">
           <div className="welcome-hero">
@@ -277,28 +327,29 @@ export default function App() {
       );
     }
 
-    // render content for notepad windows
-    if (win.type === 'notepad') {
+    if (appWindow.type === 'notepad') {
       return (
         <textarea
           className="notepad"
-          value={win.content}
-          onChange={(event) => updateWindowContent(win.id, event.target.value)}
+          value={appWindow.content}
+          onChange={(event) => updateWindowContent(appWindow.id, event.target.value)}
           placeholder="Start typing here..."
           aria-label="Notepad"
         />
       );
     }
 
-
-    // render content for calculator window
-    if (win.type === 'calculator') {
+    if (appWindow.type === 'calculator') {
       return (
         <div className="calculator-panel">
-          <output className="calculator-display">{win.content}</output>
+          <output className="calculator-display">{appWindow.content}</output>
           <div className="calculator-grid">
             {CALCULATOR_BUTTONS.map((button) => (
-              <button key={button} onClick={() => handleCalc(win.id, button)} className="calculator-key">
+              <button
+                key={button}
+                onClick={() => handleCalc(appWindow.id, button)}
+                className="calculator-key"
+              >
                 {button}
               </button>
             ))}
@@ -307,14 +358,16 @@ export default function App() {
       );
     }
 
-    return <div className="text-panel">{win.content}</div>;
+    // Terminal, explorer, browser — plain read-only text
+    return <div className="text-panel">{appWindow.content}</div>;
   };
 
+  // --- Layout: desktop workspace + taskbar ---
 
-  // main render function for the app
   return (
     <main className="desktop" onMouseMove={onMouseMove} onMouseUp={() => setDragging(null)}>
       <section className="workspace" aria-label="TXJ WebOS desktop">
+        {/* Desktop shortcut icons */}
         <div className="desktop-icons">
           {DESKTOP_SHORTCUTS.map((key) => (
             <button key={key} onClick={() => openWindow(key)} className="desktop-icon">
@@ -324,30 +377,42 @@ export default function App() {
           ))}
         </div>
 
-        {windows.map((win) => (
+        {/* Open windows — click to focus, drag title bar to move */}
+        {windows.map((appWindow) => (
           <article
-            key={win.id}
-            onClick={() => setActiveWindow(win.id)}
-            style={{ left: `${win.x}px`, top: `${win.y}px`, zIndex: activeWindow === win.id ? 10 : 1 }}
-            className={`window ${win.type === 'welcome' ? 'welcome-window' : ''}`}
+            key={appWindow.id}
+            onClick={() => setActiveWindow(appWindow.id)}
+            style={{
+              left: `${appWindow.x}px`,
+              top: `${appWindow.y}px`,
+              zIndex: activeWindow === appWindow.id ? 10 : 1,
+            }}
+            className={`window ${appWindow.type === 'welcome' ? 'welcome-window' : ''}`}
           >
-            <header className="window-titlebar" onMouseDown={(event) => startDrag(event, win.id)}>
+            <header className="window-titlebar" onMouseDown={(event) => startDrag(event, appWindow.id)}>
               <span className="window-title">
-                {win.icon} {win.title}
+                {appWindow.icon} {appWindow.title}
               </span>
-              <button onClick={(event) => closeWindow(event, win.id)} className="icon-button" aria-label="Close window">
+              <button
+                onClick={(event) => closeWindow(event, appWindow.id)}
+                className="icon-button"
+                aria-label="Close window"
+              >
                 <X size={14} />
               </button>
             </header>
-            {renderContent(win)}
+            {renderContent(appWindow)}
           </article>
         ))}
       </section>
 
-
-// taskbar and clock rendering...
+      {/* Bottom taskbar — start menu and live clock */}
       <nav className="taskbar" aria-label="Taskbar">
-        <button onClick={() => setShowStartMenu(!showStartMenu)} className="start-button" aria-expanded={showStartMenu}>
+        <button
+          onClick={() => setShowStartMenu(!showStartMenu)}
+          className="start-button"
+          aria-expanded={showStartMenu}
+        >
           <Menu size={18} /> TXJ WebOS
         </button>
         {showStartMenu && (
