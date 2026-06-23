@@ -57,7 +57,7 @@ src/
 ```
 ## Use of AI
 - To bug fix
-- To dezine the env
+- To degine the env
 
 ## License
 
