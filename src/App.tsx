@@ -3,13 +3,10 @@ import {
   Calculator,
   Clock,
   FileText,
-  Folder,
-  Globe,
   Info,
   Menu,
   Plus,
   Sparkles,
-  Terminal,
   X,
 } from 'lucide-react';
 
@@ -18,10 +15,10 @@ import {
 // ---------------------------------------------------------------------------
 
 /** How the inside of a window is rendered (welcome screen, text, notepad, etc.) */
-type AppType = 'welcome' | 'text' | 'notepad' | 'calculator';
+type AppType = 'welcome' | 'notepad' | 'calculator';
 
 /** Keys for each launchable app in the start menu and on the desktop */
-type AppKey = 'welcome' | 'terminal' | 'explorer' | 'browser' | 'notepad' | 'calculator';
+type AppKey = 'welcome' | 'notepad' | 'calculator';
 
 /** Static definition shared by every instance of the same app */
 type AppConfig = {
@@ -58,24 +55,6 @@ const APP_CONFIGS: Record<AppKey, AppConfig> = {
     type: 'welcome',
     content: '',
   },
-  terminal: {
-    title: 'Terminal',
-    icon: <Terminal size={14} />,
-    type: 'text',
-    content: 'txj-shell:~$ launch portfolio',
-  },
-  explorer: {
-    title: 'File Explorer',
-    icon: <Folder size={14} />,
-    type: 'text',
-    content: 'Projects: /portfolio /experiments /webos',
-  },
-  browser: {
-    title: 'Web Browser',
-    icon: <Globe size={14} />,
-    type: 'text',
-    content: 'https://example.com/txj-webos',
-  },
   notepad: {
     title: 'Notepad',
     icon: <FileText size={14} />,
@@ -91,7 +70,7 @@ const APP_CONFIGS: Record<AppKey, AppConfig> = {
 };
 
 /** Icons pinned to the top-left of the desktop (welcome opens on first load) */
-const DESKTOP_SHORTCUTS: AppKey[] = ['notepad', 'calculator', 'browser', 'explorer'];
+const DESKTOP_SHORTCUTS: AppKey[] = ['notepad', 'calculator'];
 
 /** Calculator keypad layout — read left-to-right, top-to-bottom */
 const CALCULATOR_BUTTONS = ['7', '8', '9', '/', '4', '5', '6', '*', '1', '2', '3', '-', 'C', '0', '=', '+'];
@@ -316,7 +295,7 @@ export default function App() {
           </div>
 
           <div className="welcome-actions" aria-label="Quick launch">
-            {(['notepad', 'calculator', 'browser'] as AppKey[]).map((type) => (
+            {DESKTOP_SHORTCUTS.map((type) => (
               <button key={type} onClick={() => openWindow(type)} className="welcome-action">
                 {APP_CONFIGS[type].icon}
                 <span>{APP_CONFIGS[type].title}</span>
@@ -358,8 +337,7 @@ export default function App() {
       );
     }
 
-    // Terminal, explorer, browser — plain read-only text
-    return <div className="text-panel">{appWindow.content}</div>;
+    return null;
   };
 
   // --- Layout: desktop workspace + taskbar ---
