@@ -55,6 +55,9 @@ src/
   styles.css
 
 ```
+## Use of AI
+- To bug fix
+- To dezine the env
 
 ## License
 
